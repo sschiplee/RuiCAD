@@ -1,0 +1,21 @@
+# ---- 编译中间产物 ----
+*.pdb
+*.obj
+*.exe.config
+installer/build.log
+# 安装器嵌入资源副本(由 build.bat 从源码自动生成)
+installer/res/
+# 编译输出(发布物统一放 release/)
+installer/dist/
+
+# ---- 测试运行输出与本机临时脚本(不入库) ----
+test/*.txt
+test/*.dwg
+test/*.png
+test/_local.scr
+test/_dbg.scr
+
+# ---- 系统杂项 ----
+Thumbs.db
+desktop.ini
+.DS_Store
