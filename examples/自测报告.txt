@@ -1,0 +1,55 @@
+RuiCAD 开源全屋定制CAD工具箱 - 无头自测报告
+生成时间: 2026-09-02 10:21:22
+版本: v0.2.0
+引擎: AutoCAD 2021 accoreconsole (R24.0)
+测试方式: 从源码与安装包释放代码分别加载, 逐命令校验图元生成(双重验证)
+
+[PASS] KJ-frame框架 (+8)
+[PASS] DG-unitcab标准柜 (+31)
+[PASS] HQ-wall画墙 (+4)
+[PASS] LB-lboard立板 (+2)
+[PASS] CB-shelves层板 (+3)
+[PASS] ZC-vboards竖隔板 (+4)
+[PASS] HD-active活动层板 (+4)
+[PASS] MD-doors门板 (+15)
+[PASS] BL-glass玻璃门 (+6)
+[PASS] CY-drawers抽屉 (+5)
+[PASS] WC-wcout外抽 (+6)
+[PASS] YG-rod衣杆 (+3)
+[PASS] FF-cloth挂衣 (+18)
+[PASS] DD-led灯带 (+2)
+[PASS] BQ-back背板 (+2)
+[PASS] GS-gs隔栅 (+40)
+[PASS] DK-dk洞洞 (+9)
+[PASS] JG-jg酒格 (+84)
+[PASS] XS-side见光板 (+4)
+[PASS] JT-plinth踢脚 (+4)
+[PASS] YH-chamfer圆角 (+1)
+[PASS] TTM-tatami榻榻米 (+21)
+[PASS] KD-wallhole开洞 (+3)
+[PASS] JL-hinges铰链 (+10)
+[PASS] LS-handle拉手 (+3)
+[PASS] SYH-cambolts三合一 (+18)
+[PASS] TZ-axono轴测 (+16)
+[PASS] FM-plan俯视 (+5)
+[PASS] PQ-section剖切 (+3)
+[PASS] BZ-dimrect标注 (+2)
+[PASS] NBZ-diminner内标 (+3)
+[PASS] BM-dimdoors门板标 (+3)
+[PASS] DBZ-dimchain连续标 (+3)
+[PASS] TK-num图框编号 (+3)
+[PASS] BH-numparts编号 = 2
+[PASS] QL-clean清理去重 = 50
+[PASS] EXIST-KS拉伸命令 = SUBR
+[PASS] EXIST-TC填充命令 = SUBR
+[PASS] MJ-area面积 = 2.16e+06
+[PASS] WJ-countlayer统计 = 52
+[PASS] UTIL-dist距离 = 5.0
+[PASS] UTIL-mid中点 = (5.0 10.0)
+[PASS] UTIL-divpts等分 = ((300 0) (600 0))
+[PASS] UTIL-split拆分 = (a b c)
+[PASS] HW-hingecount门高 = 5
+[PASS] ALIAS-region别名 = SUBR
+[PASS] VER-version版本 = RuiCAD v0.2.0 (开源版)
+  RuiCAD 自测结果: PASS=47  FAIL=0
+  全部用例通过
