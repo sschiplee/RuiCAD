@@ -52,4 +52,4 @@ RuiCAD 开源全屋定制CAD工具箱 - 无头自测报告
 [PASS] ALIAS-region别名 = SUBR
 [PASS] VER-version版本 = RuiCAD v0.2.0 (开源版)
   RuiCAD 自测结果: PASS=47  FAIL=0
-  全部用例通过
+  全部用例通过 ✓

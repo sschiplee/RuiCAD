@@ -92,6 +92,7 @@ namespace RuiCADSetup
                     using (FileStream fs = new FileStream(target, FileMode.Create, FileAccess.Write))
                     {
                         if (rs == null) { sb.AppendLine("  缺少资源: " + res); continue; }
+                        // 原始为UTF-8文本, 读出后以带BOM的UTF-8写回
                         using (StreamReader sr = new StreamReader(rs, new UTF8Encoding(false)))
                         using (StreamWriter sw = new StreamWriter(fs, utf8bom))
                             sw.Write(sr.ReadToEnd());
@@ -127,12 +128,16 @@ namespace RuiCADSetup
         {
             int count = 0;
             string initLsp = Path.Combine(dir, "init.lsp");
+            // Autodesk AutoCAD
             count += ConfigureVendor(@"Software\Autodesk\AutoCAD", dir, initLsp, add, sb, "AutoCAD");
+            // 中望 ZWCAD (best-effort)
             count += ConfigureVendor(@"Software\ZWSOFT\ZWCAD", dir, initLsp, add, sb, "中望CAD");
+            // 浩辰 GstarCAD (best-effort)
             count += ConfigureVendor(@"Software\Gstarsoft\GstarCAD", dir, initLsp, add, sb, "浩辰CAD");
             return count;
         }
 
+        // 通用: 遍历某厂商根键下的 版本->产品->Profiles, 改支持路径 + 启动套件
         static int ConfigureVendor(string rootRel, string dir, string initLsp,
                                    bool add, StringBuilder sb, string label)
         {
@@ -149,10 +154,12 @@ namespace RuiCADSetup
                             if (verKey == null) continue;
                             foreach (string prod in verKey.GetSubKeyNames())
                             {
+                                // AutoCAD 产品键形如 ACAD-4101:804; 国产CAD层级略有差异, 统一尝试
                                 using (RegistryKey prodKey = verKey.OpenSubKey(prod, true))
                                 {
                                     if (prodKey == null) continue;
                                     if (HandleProfiles(prodKey, dir, initLsp, add, sb, label)) n++;
+                                    // 国产CAD: 产品键下可能直接是 Profiles
                                 }
                             }
                         }
@@ -163,10 +170,12 @@ namespace RuiCADSetup
             return n;
         }
 
+        // 在产品键下找 Profiles\*\General 改 ACAD 支持路径; 并写启动套件
         static bool HandleProfiles(RegistryKey prodKey, string dir, string initLsp,
                                    bool add, StringBuilder sb, string label)
         {
             bool touched = false;
+            // 1) 支持路径
             using (RegistryKey profiles = prodKey.OpenSubKey("Profiles"))
             {
                 if (profiles != null)
@@ -184,10 +193,12 @@ namespace RuiCADSetup
                     }
                 }
             }
+            // 2) 启动套件 (启动时自动加载 init.lsp)
             try
             {
                 using (RegistryKey startup = prodKey.CreateSubKey(@"Dialogs\Appload\Startup"))
                 {
+                    // 收集现有值
                     var names = new List<string>(startup.GetValueNames());
                     bool exists = false;
                     foreach (string vn in names)
@@ -256,6 +267,8 @@ namespace RuiCADSetup
         }
 
         // ---------------- 即时加载正在运行的 CAD(免重启) ----------------
+        // 通过 COM 自动化连接"已经打开"的 CAD(AutoCAD/中望/浩辰), 向每个打开的
+        // 文档发送 (load init.lsp), 使安装在当前窗口立即生效; 未运行则跳过。
         static int LiveLoad(string initLsp)
         {
             string[] progIds = { "AutoCAD.Application", "ZWCAD.Application", "GstarCAD.Application" };
@@ -265,7 +278,7 @@ namespace RuiCADSetup
             {
                 object app = null;
                 try { app = Marshal.GetActiveObject(pid); }
-                catch { continue; }
+                catch { continue; }   // 该 CAD 未运行, 跳过(不会启动新实例)
                 if (app == null) continue;
                 try
                 {
@@ -312,6 +325,7 @@ namespace RuiCADSetup
                 Registry.CurrentUser.DeleteSubKeyTree(UninstKey, false);
             }
             catch { }
+            // 删除安装文件; 卸载器自身运行时被锁定, 启动延迟命令在进程退出后自删整个目录
             try
             {
                 ProcessStartInfo psi = new ProcessStartInfo("cmd.exe",
@@ -349,6 +363,7 @@ namespace RuiCADSetup
                 Text = "开源免费 · 无需注册登录 · 支持 AutoCAD / 中望 / 浩辰" };
             Controls.Add(lblTitle); Controls.Add(lblSub);
 
+            // ---- 第一页: 安装选项 ----
             p1 = new Panel { Left = 20, Top = 90, Width = 510, Height = 270 };
             Label l1 = new Label { Left = 0, Top = 10, Width = 480, Text = "安装位置:" };
             txtDir = new TextBox { Left = 0, Top = 34, Width = 400, Text = Program.DefaultDir };
@@ -371,6 +386,7 @@ namespace RuiCADSetup
             p1.Controls.Add(l1); p1.Controls.Add(txtDir); p1.Controls.Add(btnBrowse); p1.Controls.Add(l2);
             Controls.Add(p1);
 
+            // ---- 第二页: 进度 ----
             p2 = new Panel { Left = 20, Top = 90, Width = 510, Height = 270, Visible = false };
             bar = new ProgressBar { Left = 0, Top = 6, Width = 500, Height = 18, Style = ProgressBarStyle.Continuous };
             txtLog = new TextBox { Left = 0, Top = 36, Width = 500, Height = 220,
@@ -379,6 +395,7 @@ namespace RuiCADSetup
             p2.Controls.Add(bar); p2.Controls.Add(txtLog);
             Controls.Add(p2);
 
+            // ---- 底部按钮 ----
             btnMain = new Button { Left = 350, Top = 375, Width = 95, Height = 32, Text = "立即安装" };
             btnCancel = new Button { Left = 455, Top = 375, Width = 75, Height = 32, Text = "取消" };
             btnMain.Click += OnMain;
