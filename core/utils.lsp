@@ -112,6 +112,9 @@
       (if p2 (list p1 p2) nil)))
   )
 
+;;; rc:region 为 rc:get-rect 的兼容别名(部分模块使用此命名)
+(defun rc:region (msg) (rc:get-rect msg))
+
 ;;; ---------- 数值输入辅助 ----------
 (defun rc:getint (msg def / v)
   (initget 6)
