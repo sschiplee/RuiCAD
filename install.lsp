@@ -8,6 +8,7 @@
 ;;;  卸载: 命令行输入 RC-UNINSTALL 可移除支持路径
 ;;; ============================================================
 
+;;; ---------- 定位安装目录 ----------
 (defun rc:install-locate ()
   (vl-string-right-trim
     "\\"
@@ -15,6 +16,7 @@
       "install.lsp"
       (findfile "install.lsp"))))
 
+;;; ---------- 添加支持路径 ----------
 (defun rc:install-addpath (dir / old up)
   (setq old (getenv "ACAD"))
   (if (null old) (setq old ""))
@@ -27,6 +29,7 @@
       (princ (strcat "\n[RuiCAD] 目录已在支持路径中: " dir))
       nil)))
 
+;;; ---------- 移除支持路径 (卸载) ----------
 (defun c:RC-UNINSTALL (/ dir old segs new s)
   (setq dir (rc:install-locate))
   (setq old (getenv "ACAD"))
@@ -39,6 +42,7 @@
   (princ "\n[RuiCAD] 已从支持路径移除(卸载完成)")
   (princ))
 
+;;; ---------- 执行安装 ----------
 (defun rc:install ()
   (setq *rc-root* (rc:install-locate))
   (if (and *rc-root* (/= *rc-root* ""))
