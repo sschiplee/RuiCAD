@@ -1,0 +1,22 @@
+;;; RuiCAD install-dir regression script
+;;; Loads the released files from %LOCALAPPDATA%\RuiCAD (i.e. what the installer put down),
+;;; then runs the SAME test suite (test_main.lsp) located in the source tree (RC_ROOT).
+;;;
+;;; Usage:
+;;;   set RC_ROOT=<project root>   (run_tests.bat sets it automatically)
+;;;   accoreconsole.exe /s final_verify.scr
+(setq rr   (strcat (getenv "LOCALAPPDATA") "/RuiCAD"))
+(setq root (getenv "RC_ROOT"))
+(load (strcat rr "/core/settings.lsp"))
+(load (strcat rr "/core/utils.lsp"))
+(load (strcat rr "/commands/draw.lsp"))
+(load (strcat rr "/commands/parts.lsp"))
+(load (strcat rr "/commands/view.lsp"))
+(load (strcat rr "/commands/dim.lsp"))
+(load (strcat rr "/commands/hardware.lsp"))
+(load (strcat rr "/commands/edit.lsp"))
+(load (strcat rr "/commands/panel.lsp"))
+(load (strcat root "/test/test_main.lsp"))
+(rc:run-all)
+(princ "\nRC_FINAL_FINISHED")
+(quit)
