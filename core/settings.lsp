@@ -9,52 +9,54 @@
 ;;; ============================================================
 
 ;;; ---------- 板材与结构参数 (单位: 毫米) ----------
-(setq *rc-thk*        18)
-(setq *rc-back-thk*   9)
-(setq *rc-gap*        2)
-(setq *rc-top-gap*    5)
-(setq *rc-bottom-gap* 15)
-(setq *rc-plinth*     100)
-(setq *rc-rod-d*      32)
-(setq *rc-drawer-h*   200)
-(setq *rc-open-gap*   3)
+(setq *rc-thk*        18)   ; 常规板材厚度
+(setq *rc-back-thk*   9)    ; 背板厚度
+(setq *rc-gap*        2)    ; 门缝/板缝
+(setq *rc-top-gap*    5)    ; 顶部收口缝
+(setq *rc-bottom-gap* 15)   ; 底部离地缝隙
+(setq *rc-plinth*     100)  ; 踢脚板高度
+(setq *rc-rod-d*      32)   ; 衣杆直径 (画圆用)
+(setq *rc-drawer-h*   200)  ; 抽屉高度(自动生成时默认)
+(setq *rc-open-gap*   3)    ; 开放柜/见光板缝隙
 
 ;;; ---------- 默认绘制参数 ----------
-(setq *rc-door-num*   2)
-(setq *rc-shelf-num*  3)
-(setq *rc-depth*      600)
-(setq *rc-dim-off*    20)
-(setq *rc-gs-gap*     30)
-(setq *rc-gs-w*       8)
-(setq *rc-dk-d*       20)
-(setq *rc-dk-gap*     50)
-(setq *rc-jg-w*       45)
-(setq *rc-jg-h*       55)
+(setq *rc-door-num*   2)    ; 门板默认数量
+(setq *rc-shelf-num*  3)    ; 层板默认数量
+(setq *rc-depth*      600)  ; 柜体默认深度 (轴测图挤出用)
+(setq *rc-dim-off*    20)   ; 标注偏移距离
+(setq *rc-gs-gap*     30)   ; 隔栅板栅条间距
+(setq *rc-gs-w*       8)    ; 隔栅板栅条宽度
+(setq *rc-dk-d*       20)   ; 洞洞板孔直径
+(setq *rc-dk-gap*     50)   ; 洞洞板孔间距
+(setq *rc-jg-w*       45)   ; 酒格格宽
+(setq *rc-jg-h*       55)   ; 酒格格深(高)
 
 ;;; ---------- 五金与孔位参数 ----------
-(setq *rc-hinge-cup*  35)
-(setq *rc-hinge-edge* 100)
-(setq *rc-cam-pitch*  32)
-(setq *rc-cam-d*      5)
-(setq *rc-handle-len* 128)
+(setq *rc-hinge-cup*  35)   ; 铰链铰杯直径
+(setq *rc-hinge-edge* 100)  ; 铰杯距门顶/门边距离
+(setq *rc-cam-pitch*  32)   ; 三合一/系统孔孔距(32mm系统)
+(setq *rc-cam-d*      5)    ; 系统孔直径
+(setq *rc-handle-len* 128)  ; 默认拉手长度
 
-;;; ---------- 标注样式参数 ----------
-(setq *rc-dim-txt*    35)
-(setq *rc-dim-asz*    25)
-(setq *rc-dim-exe*    12)
-(setq *rc-dim-exo*    8)
-(setq *rc-dim-gap*    8)
+;;; ---------- 标注样式参数 (按毫米图纸放大, 保证出图清晰) ----------
+(setq *rc-dim-txt*    35)   ; 标注文字高度
+(setq *rc-dim-asz*    25)   ; 箭头/斜线大小
+(setq *rc-dim-exe*    12)   ; 尺寸界线超出尺寸线
+(setq *rc-dim-exo*    8)    ; 尺寸界线起点偏移
+(setq *rc-dim-gap*    8)    ; 文字与尺寸线间隙
 
 ;;; ---------- 图层体系 ----------
+;;; 名称 -> 颜色号 (AutoCAD 标准色: 1红 2黄 3绿 4青 5蓝 6品红 7白 8灰 9浅灰)
 (setq *rc-layers* '(
-  (("RC-柜体" 7))
-  (("RC-内部" 1))
-  (("RC-门板" 3))
-  (("RC-五金" 4))
-  (("RC-灯带" 5))
-  (("RC-标注" 2))
-  (("RC-辅助" 8))
-  (("RC-文字" 7))
+  ("RC-柜体"   7)
+  ("RC-内部"   1)
+  ("RC-门板"   3)
+  ("RC-五金"   4)
+  ("RC-灯带"   5)
+  ("RC-标注"   2)
+  ("RC-辅助"   8)
+  ("RC-文字"   7)
 ))
 
+;;; 返回版本号 (便于排查)
 (defun rc:version () "RuiCAD v0.2.0 (开源版)")
