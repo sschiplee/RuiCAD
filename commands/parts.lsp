@@ -3,13 +3,16 @@
 ;;;  模块: 板件与部件 (parts.lsp)
 ;;;  ------------------------------------------------------------
 ;;;  协议: MIT License
+;;;  对标: 光速 66门板/5外抽/ZZ灯带/BB背板/3层板, 碧福 洞洞板/隔栅/抽屉/榻榻米,
+;;;        紫灵 一键柜门/挂衣服/均分线板, 雷神 CB/LB/ZC/HD活动层板, 123插件 圆弧倒角
 ;;;  命令: LB立板 CB层板 ZC竖隔板 HD活动层板 MD门板 BL玻璃门 CY抽屉 WC外抽
 ;;;        YG衣杆 FF挂衣 DD灯带 BQ背板 GS隔栅 DK洞洞 JG酒格 XS见光板 JT踢脚
 ;;;        YH圆角 KD墙体开洞 TTM榻榻米
 ;;; ============================================================
 
-;;; ---------- 区域选择辅助 ----------
-(defun rc:region (msg) (rc:get-rect msg))
+;;; ---------- 区域选择辅助: 框选矩形区域 ----------
+(defun rc:region (msg)
+  (rc:get-rect msg))
 
 ;;; ---------- LB 立板 ----------
 (defun rc:lboard (p1 p2 x thk / x1 x2)
@@ -56,7 +59,7 @@
     (princ "\n[CB] 已取消"))
   (princ))
 
-;;; ---------- ZC 竖隔板 (竖向均分) ----------
+;;; ---------- ZC 竖隔板 (竖向均分, 对标雷神 ZC) ----------
 (defun rc:vboards (p1 p2 n thk / x1 x2 yb yt span i cx lx rx)
   (setq x1 (+ (car p1) thk) x2 (- (car p2) thk))
   (setq yb (+ (cadr p1) thk) yt (- (cadr p2) thk))
@@ -80,7 +83,7 @@
     (princ "\n[ZC] 已取消"))
   (princ))
 
-;;; ---------- HD 活动层板 (双线 + 两端销孔) ----------
+;;; ---------- HD 活动层板 (双线 + 两端层板销孔, 表示可拆) ----------
 (defun rc:active-shelf (p1 p2 thk d / x1 x2 y my)
   (setq x1 (car p1) x2 (car p2) y (cadr p1) my (+ y (/ thk 2.0)))
   (rc:line (list x1 y) (list x2 y) "RC-内部")
@@ -389,7 +392,7 @@
 (defun rc:chamfer (p1 p2 r / x1 y1 x2 y2 b)
   (setq x1 (car p1) y1 (cadr p1))
   (setq x2 (car p2) y2 (cadr p2))
-  (setq b (- (sqrt 2.0) 1.0))
+  (setq b (- (sqrt 2.0) 1.0))   ; 90度圆角凸度 = tan(22.5度)
   (entmake (list (cons 0 "LWPOLYLINE")
                  (cons 100 "AcDbEntity")
                  (cons 8 "RC-柜体")
@@ -420,10 +423,11 @@
     (princ "\n[YH] 已取消"))
   (princ))
 
-;;; ---------- KD 墙体开洞 ----------
+;;; ---------- KD 墙体开洞 (水平双线墙开门/窗洞, 自动断线+封口) ----------
 (defun rc:wall-hole (xL xR yB yT / lst en ed a b lay)
   (foreach en (rc:lines-in-box xL yB xR yT nil)
     (setq ed (entget en) a (cdr (assoc 10 ed)) b (cdr (assoc 11 ed)) lay (cdr (assoc 8 ed)))
+    ;; 仅处理“横跨洞口”的水平线段: 删除并在洞口两侧重画
     (if (and (equal (cadr a) (cadr b) 0.01)
              (< (car a) xL) (> (car b) xR))
       (progn
@@ -447,7 +451,7 @@
 (defun rc:tatami (p1 p2 nd / x1 y1 x2 dh w span i cx thk)
   (setq x1 (car p1) y1 (cadr p1) x2 (car p2) thk *rc-thk*)
   (setq w (- x2 x1))
-  (setq dh (* (- (cadr p2) (cadr p1)) 0.32))
+  (setq dh (* (- (cadr p2) (cadr p1)) 0.32))   ; 下部抽屉区占总高 32%
   (rc:rect p1 p2 "RC-柜体")
   (setq span (/ w nd) i 0)
   (while (< i nd)
