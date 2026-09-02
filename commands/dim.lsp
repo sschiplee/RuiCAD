@@ -3,13 +3,15 @@
 ;;;  模块: 标注统计与通用工具 (dim.lsp)
 ;;;  ------------------------------------------------------------
 ;;;  协议: MIT License
+;;;  对标: 光速 Q1/SDD/DDGZ连续标注, 雷神 BG柜体/BM门板标注, CD拆单报表,
+;;;        碧福 面积/Excel导出, 濮汇 批量图片
 ;;;  命令: BZ一键标注 NBZ内部标注 DBZ逐段连续标注 BM门板标注
 ;;;        MJ面积 WJ部件清单 BOM拆单(CSV) BOM2详细统计(CSV) BH板件编号
 ;;;        PRIM批量图片 TK图框编号 TS文字刷 KB图库
 ;;; ============================================================
 (vl-load-com)
 
-;;; ---------- BZ 一键标注 ----------
+;;; ---------- BZ 一键标注 (区域外框宽高) ----------
 (defun rc:dimrect (p1 p2 / x1 y1 x2 y2 off)
   (rc:golayer "RC-标注" 2)
   (setq x1 (car p1) y1 (cadr p1))
@@ -30,7 +32,7 @@
     (princ "\n[BZ] 已取消"))
   (princ))
 
-;;; ---------- NBZ 内部标注 ----------
+;;; ---------- NBZ 内部标注 (区域内部 n 段均分标注) ----------
 (defun rc:diminner (p1 p2 n / x1 x2 span i x)
   (rc:golayer "RC-标注" 2)
   (setq x1 (car p1) x2 (car p2))
@@ -55,7 +57,7 @@
     (princ "\n[NBZ] 已取消"))
   (princ))
 
-;;; ---------- DBZ 逐段连续标注 ----------
+;;; ---------- DBZ 逐段连续标注 (自动识别区域内竖线, 从左到右连续标) ----------
 (defun rc:dimchain (p1 p2 off / xL xR yb yT en ed a b xs sorted prevn curn k)
   (rc:golayer "RC-标注" 2)
   (setq xL (car p1) xR (car p2) yb (cadr p1) yT (cadr p2))
@@ -64,6 +66,7 @@
     (setq ed (entget en) a (cdr (assoc 10 ed)) b (cdr (assoc 11 ed)))
     (if (equal (car a) (car b) 0.01) (setq xs (cons (car a) xs))))
   (setq sorted (vl-sort xs '(lambda (u v) (< u v))))
+  ;; 去掉容差 1 内的重复坐标
   (setq xs nil)
   (foreach x sorted
     (if (or (null xs) (> (abs (- x (car xs))) 1)) (setq xs (cons x xs))))
@@ -86,7 +89,7 @@
     (princ "\n[DBZ] 已取消"))
   (princ))
 
-;;; ---------- BM 门板标注 ----------
+;;; ---------- BM 门板标注 (逐扇标净宽) ----------
 (defun rc:dim-doors (p1 p2 n gap / w i xa xb y)
   (rc:golayer "RC-标注" 2)
   (setq w (/ (- (car p2) (car p1)) n) i 0
@@ -110,7 +113,7 @@
     (princ "\n[BM] 已取消"))
   (princ))
 
-;;; ---------- MJ 面积统计 ----------
+;;; ---------- MJ 面积统计 (四点闭合, 单位换算) ----------
 (defun rc:area (p1 p2 / a)
   (command "_.area"
            "_non" p1
@@ -137,7 +140,7 @@
     (sslength ss)
     0))
 
-;;; ---------- WJ 部件清单 ----------
+;;; ---------- WJ 五金/门板/部件清单 ----------
 (defun c:WJ ()
   (rc:env)
   (princ "\n[WJ] 全图部件清单统计:")
@@ -147,7 +150,7 @@
   (princ "\n[WJ] 统计完成")
   (princ))
 
-;;; ---------- BOM 拆单统计 CSV ----------
+;;; ---------- BOM 拆单统计 (按图层统计并输出CSV) ----------
 (defun rc:bom (path / f rows lay n)
   (setq rows nil)
   (foreach item *rc-layers*
@@ -169,7 +172,7 @@
   (if fname (princ (rc:bom fname)) (princ "\n[BOM] 已取消"))
   (princ))
 
-;;; ---------- BOM2 详细统计 CSV ----------
+;;; ---------- BOM2 详细统计 (分图层: 线段数/线总长/圆数/多段线数 -> CSV) ----------
 (defun rc:layer-len (lay / ss i ed tot a b)
   (setq tot 0.0)
   (if (setq ss (ssget "_X" (list (cons 8 lay) (cons 0 "LINE"))))
@@ -204,7 +207,7 @@
   (if fname (princ (rc:bom2 fname)) (princ "\n[BOM2] 已取消"))
   (princ))
 
-;;; ---------- BH 板件编号 ----------
+;;; ---------- BH 板件编号 (选中对象逐个加圆圈序号) ----------
 (defun rc:num-parts (ss / i en ed p n h)
   (rc:golayer "RC-文字" 7)
   (setq i 0 n 1 h *rc-dim-txt*)
@@ -323,7 +326,7 @@
           (setq base (getpoint "\n指定基点: "))
           (if base
             (progn (rc:make-block name ss base)
-                   (princ (strcat "\n[KB] 图块已建立并可插入")))
+                   (princ (strcat "\n[KB] 图块 \"" name "\" 已建立并可插入")))
             (princ "\n[KB] 已取消")))
         (princ "\n[KB] 名称无效")))
     (princ "\n[KB] 已取消"))

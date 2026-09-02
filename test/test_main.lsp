@@ -90,7 +90,7 @@
   (rc:t "BZ-dimrect标注"   'rc:dimrect  (list '(4000 0) '(4900 2400)) 2)
   (rc:t "NBZ-diminner内标" 'rc:diminner (list '(4000 -3000) '(4900 -600) 4) 3)
   (rc:t "BM-dimdoors门板标" 'rc:dim-doors (list '(5000 0) '(5900 2400) 3 2.0) 3)
-  ;; DBZ 连续标注: 先造两条内部竖线, 形成三段
+  ;; DBZ 连续标注: 先造两条内部竖线, 形成 0/300/600/900 三段
   (rc:line '(20000 0) '(20000 2400) "RC-内部")
   (rc:line '(20300 0) '(20300 2400) "RC-内部")
   (rc:line '(20600 0) '(20600 2400) "RC-内部")
@@ -124,6 +124,6 @@
     (progn
       (princ "\n  ---- 失败明细 ----")
       (foreach f (reverse *rc-fails*) (princ (strcat "\n  [FAIL] " f))))
-    (princ "\n  全部用例通过"))
+    (princ "\n  全部用例通过 ✓"))
   (princ "\n==================================================")
   (princ))
