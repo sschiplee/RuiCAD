@@ -3,6 +3,7 @@
 ;;;  模块: 五金与孔位 (hardware.lsp)
 ;;;  ------------------------------------------------------------
 ;;;  协议: MIT License
+;;;  对标: 雷神 三合一排孔/铰链排孔, 碧福/光速 拉手/五金自动布置
 ;;;  命令: JL铰链(按门高自动定数) LS拉手 SYH三合一32mm系统排孔
 ;;; ============================================================
 
@@ -14,6 +15,7 @@
         (t 5)))
 
 ;;; ---------- JL 铰链: 在门板一侧竖边上自动布置铰杯 ----------
+;;; side 0=左边 1=右边; edge 铰杯距门顶/门底距离
 (defun rc:hinges (p1 p2 side edge / x h n i y yb yt)
   (setq h (- (cadr p2) (cadr p1)))
   (setq n (rc:hinge-count h))
@@ -24,6 +26,7 @@
     (setq y (if (= n 1)
               (/ (+ (cadr p1) (cadr p2)) 2.0)
               (+ yb (/ (* (- yt yb) i) (1- n)))))
+    ;; 铰杯(Φ35) + 安装底座短线
     (rc:circle (list x y) (/ *rc-hinge-cup* 2.0) "RC-五金")
     (if (= side 0)
       (rc:line (list (+ x (/ *rc-hinge-cup* 2.0)) y) (list (+ x (/ *rc-hinge-cup* 2.0) 24) y) "RC-五金")
@@ -43,6 +46,7 @@
   (princ))
 
 ;;; ---------- LS 拉手: 门板横装条形拉手(双支脚) ----------
+;;; hpos 拉手竖向位置(0~1 比例), len 拉手长度
 (defun rc:handle (p1 p2 hpos len / cx cy dx)
   (setq cx (/ (+ (car p1) (car p2)) 2.0))
   (setq cy (+ (cadr p1) (* (- (cadr p2) (cadr p1)) hpos)))
@@ -64,9 +68,10 @@
   (princ))
 
 ;;; ---------- SYH 三合一排孔(32mm 系统): 板边一列系统孔 ----------
+;;; side 0=左边 37mm 处 1=右边 37mm 处; pitch 孔距(32系统)
 (defun rc:cam-bolts (p1 p2 side pitch d / x y y0 y1 inset)
   (setq y0 (cadr p1) y1 (cadr p2))
-  (setq inset 37)
+  (setq inset 37)   ; 系统孔距板面 37mm
   (setq x (if (= side 0) (+ (car p1) inset) (- (car p2) inset)))
   (setq y (+ y0 pitch))
   (while (< y y1)

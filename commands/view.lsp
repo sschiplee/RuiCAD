@@ -3,6 +3,8 @@
 ;;;  模块: 视图生成 (view.lsp)
 ;;;  ------------------------------------------------------------
 ;;;  协议: MIT License
+;;;  对标: 光速 ZCT/SW, 碧福 一键立面转轴测(深度/方向可调),
+;;;        紫灵 WW1 平侧面, 雷神 FD 局部放大
 ;;;  命令: TZ 假三维轴测 | FM 俯视投影 | PQ 剖切平侧面 | FD 大样放大
 ;;; ============================================================
 
@@ -13,16 +15,20 @@
   (if (= dir 0)
     (setq dx (- depth) dy (- depth))
     (setq dx depth   dy (- depth)))
+  ;; 前面(原立面)
   (rc:rect p1 p2 "RC-柜体")
+  ;; 偏移后的背面
   (setq o1 (list (+ x1 dx) (+ y1 dy)))
   (setq o2 (list (+ x2 dx) (+ y1 dy)))
   (setq o3 (list (+ x2 dx) (+ y2 dy)))
   (setq o4 (list (+ x1 dx) (+ y2 dy)))
   (rc:rect o1 o3 "RC-内部")
+  ;; 顶面
   (rc:line (list x1 y2) (list x2 y2) "RC-内部")
   (rc:line o4 o3 "RC-内部")
   (rc:line (list x1 y2) o4 "RC-内部")
   (rc:line (list x2 y2) o3 "RC-内部")
+  ;; 侧面
   (rc:line (list x2 y1) (list x2 y2) "RC-内部")
   (rc:line o2 o3 "RC-内部")
   (rc:line (list x2 y1) o2 "RC-内部")
@@ -45,7 +51,9 @@
   (setq x1 (car p1) y1 (cadr p1))
   (setq x2 (car p2) y2 (cadr p2))
   (setq w (- x2 x1))
+  ;; 俯视外框: 宽=柜宽, 深=depth
   (rc:rect (list x1 (- y1 depth)) (list x2 y1) "RC-柜体")
+  ;; 投影内部竖直线段(LINE)的 x 位置(几何范围选择, 稳定可靠)
   (foreach en (rc:lines-in-box (+ x1 thk) (+ y1 thk) (- x2 thk) (- y2 thk) nil)
     (setq ed (entget en) a (cdr (assoc 10 ed)) b (cdr (assoc 11 ed)))
     (if (and (equal (car a) (car b) 0.01)
@@ -89,7 +97,7 @@
     (princ "\n[PQ] 已取消"))
   (princ))
 
-;;; ---------- FD 大样图局部放大 ----------
+;;; ---------- FD 大样图局部放大 (复制后缩放) ----------
 (defun rc:detail (ss base scale pt / ns)
   (command "_.copy" ss "" "_non" base "_non" pt "")
   (setq ns (ssget "_P"))

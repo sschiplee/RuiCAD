@@ -3,10 +3,11 @@
 ;;;  模块: 编辑与效率工具 (edit.lsp)
 ;;;  ------------------------------------------------------------
 ;;;  协议: MIT License
+;;;  对标: 雷神 KS智能拉伸, 各插件 批量清理/去重, 自定义填充
 ;;;  命令: KS智能拉伸 QL清理(零长度+重合去重) TC区域填充
 ;;; ============================================================
 
-;;; ---------- KS 智能拉伸 ----------
+;;; ---------- KS 智能拉伸 (封装 STRETCH, 从右向左框选一侧整体拉伸) ----------
 (defun c:KS (/ p1 p2 b d)
   (rc:env)
   (princ "\nKS 智能拉伸: 交叉窗口框选要移动的一侧顶点")
@@ -26,9 +27,10 @@
     (princ "\n[KS] 已取消"))
   (princ))
 
-;;; ---------- QL 清理: 删零长度线 + 重合重复线, 返回删除数 ----------
+;;; ---------- QL 清理: 删除零长度线段 + 完全重合的重复线段, 返回删除数 ----------
 (defun rc:clean (/ ss i en ed a b lay seen del key)
   (setq del 0)
+  ;; 1) 零长度 LINE
   (if (setq ss (ssget "_X" (list (cons 0 "LINE"))))
     (progn (setq i 0)
       (while (< i (sslength ss))
@@ -36,6 +38,7 @@
               a (cdr (assoc 10 ed)) b (cdr (assoc 11 ed)))
         (if (< (rc:dist a b) 0.01) (progn (entdel en) (setq del (1+ del))))
         (setq i (1+ i)))))
+  ;; 2) 完全重合重复 LINE (同图层、端点坐标一致, 忽略方向)
   (setq seen nil)
   (if (setq ss (ssget "_X" (list (cons 0 "LINE"))))
     (progn (setq i 0)
@@ -57,7 +60,8 @@
   (princ (strcat "\n[QL] 清理完成, 删除 " (itoa n) " 个无效/重复线段"))
   (princ))
 
-;;; ---------- TC 区域填充 ----------
+;;; ---------- TC 区域填充 (对选定闭合边界加图案填充) ----------
+;;; pat: 填充图案名(SOLID 实心 / ANSI31 斜线 等), scale 比例
 (defun rc:fill (ss pat scale)
   (command "_.-hatch" "_P" pat scale "0" "_S" ss "" "")
   t)

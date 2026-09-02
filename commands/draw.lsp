@@ -3,14 +3,18 @@
 ;;;  模块: 柜体框架与标准柜 (draw.lsp)
 ;;;  ------------------------------------------------------------
 ;;;  协议: MIT License
+;;;  对标: 光速 KJ/KG, 碧福 框架/一键库, 雷神 WG/DG/KJ, 沐辰 标准柜
 ;;;  命令: KJ 画框架 | DG 标准柜 | WG 吊柜 | HQ 画墙
 ;;; ============================================================
 
 ;;; ---------- KJ 画柜体框架 (双线结构) ----------
+;;; rc:frame p1 左下角 p2 右上角 thk 板厚 -> 画外框+内框, 返回内框角点
 (defun rc:frame (p1 p2 thk / px1 py1 px2 py2 i1 i2)
   (setq px1 (car p1) py1 (cadr p1))
   (setq px2 (car p2) py2 (cadr p2))
+  ;; 外框
   (rc:rect p1 p2 "RC-柜体")
+  ;; 内框: 向内缩 thk (保证最小边, 防止反向)
   (setq i1 (list (+ px1 thk) (+ py1 thk)))
   (setq i2 (list (- px2 thk) (- py2 thk)))
   (if (and (< (car i1) (car i2)) (< (cadr i1) (cadr i2)))
@@ -31,21 +35,27 @@
     (princ "\n[KJ] 已取消"))
   (princ))
 
-;;; ---------- DG 参数化标准柜 ----------
+;;; ---------- DG 参数化标准柜 (一键库核心) ----------
+;;; rc:unit-cab base 左下角 w 宽 h 高 thk 板厚 shelves 层板数
+;;;         kick 踢脚高(0无) door 门板数(0无门) -> 生成柜体立面
 (defun rc:unit-cab (base w h thk shelves kick door / p0 p1 cx
                      p2 p3 top bot span pts i x1 x2)
-  (setq p0 base)
-  (setq p1 (list (+ (car p0) w) (cadr p0)))
-  (setq p2 (list (car p1) (+ (cadr p1) h)))
-  (setq p3 (list (car p0) (+ (cadr p0) h)))
+  (setq p0 base)                              ; 左下
+  (setq p1 (list (+ (car p0) w) (cadr p0)))   ; 右下
+  (setq p2 (list (car p1) (+ (cadr p1) h)))   ; 右上
+  (setq p3 (list (car p0) (+ (cadr p0) h)))   ; 左上
+  ;; 踢脚
   (if (> kick 0)
     (progn
       (rc:rect p0 (list (car p1) (+ (cadr p0) kick)) "RC-柜体")
       (setq p0 (list (car p0) (+ (cadr p0) kick)))))
+  ;; 左右侧板(双线)
   (rc:rect (list (car p0) (cadr p0)) (list (+ (car p0) thk) (- (cadr p2) thk)) "RC-柜体")
   (rc:rect (list (- (car p2) thk) (cadr p0)) (list (car p2) (- (cadr p2) thk)) "RC-柜体")
+  ;; 顶底板
   (rc:rect (list (+ (car p0) thk) (cadr p0)) (list (- (car p2) thk) (+ (cadr p0) thk)) "RC-柜体")
   (rc:rect (list (+ (car p0) thk) (- (cadr p2) thk)) (list (- (car p2) thk) (cadr p2)) "RC-柜体")
+  ;; 层板等分 (在内部空间)
   (setq top (- (cadr p2) (* 2 thk)))
   (setq bot (+ (cadr p0) (* 2 thk)))
   (if (> shelves 0)
@@ -56,6 +66,7 @@
         (setq y (+ bot (/ (* span i) (1+ shelves))))
         (rc:line (list (+ (car p0) thk) y) (list (- (car p2) thk) y) "RC-内部")
         (setq i (1+ i)))))
+  ;; 门板 (均分)
   (if (> door 0)
     (progn
       (setq cx (car p0))
@@ -86,7 +97,7 @@
     (princ "\n[DG] 已取消"))
   (princ))
 
-;;; ---------- WG 吊柜 ----------
+;;; ---------- WG 吊柜 (悬空柜, 底部无踢脚) ----------
 (defun c:WG ()
   (rc:env)
   (setq base (getpoint "\nWG 吊柜 - 指定左下角点: "))
@@ -103,6 +114,7 @@
   (princ))
 
 ;;; ---------- HQ 画墙 (双线墙) ----------
+;;; rc:wall p1 p2 墙厚 thk -> 画双线墙
 (defun rc:wall (p1 p2 thk / ang d p1a p1b p2a p2b)
   (setq ang (angle p1 p2))
   (setq d   (/ thk 2.0))
